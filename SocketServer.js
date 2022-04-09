@@ -1,20 +1,34 @@
 const socketio = require("socket.io")
+const { createClient } = require('redis');
+const { createAdapter } = require("@socket.io/redis-adapter");
+const { setupWorker } = require("@socket.io/sticky");
 const { noteController } = require("./controllers")
 var users = []
 var io = null
 
-exports.createSocketServer = (server) => {
+const pubClient = createClient({ host: 'localhost', port: 6379 });
+const subClient = pubClient.duplicate();
+
+exports.createSocketServer = async (server) => {
+    await pubClient.connect()
+    await subClient.connect()
     io = socketio(server, {
         cors: {
             origin: "*",
-        }
+        },
+        adapter: createAdapter(pubClient, subClient)
     })
 
-    io.on("connection", socket => {
-        console.log(socket.id)
-        console.log("user connected")
+    setupWorker(io)
 
-        socket.on("userid", async ({ userid }) => {
+
+    io.on("connection", socket => {
+
+
+        socket.on("userid", async ({ userid, email }) => {
+            console.log("user connected")
+            console.log(socket.id)
+            console.log(email)
             addUser({ userid, socketid: socket.id })
             let result = await noteController.getUserUseSeenNotesSummary(userid)
             if (result) {

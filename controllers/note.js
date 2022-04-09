@@ -3,13 +3,25 @@ const { v4: uuidv4 } = require('uuid');
 var format = require('pg-format');
 const SocketServer = require("../SocketServer")
 const { getPagination, getPagingData } = require("../middleware/paginate")
+const { createClient } = require('redis');
+const client = createClient({ host: 'localhost', port: 6379 });
+(async () => {
+    await client.connect()
+})()
 exports.createNote = async (req, res, next) => {
     try {
         let id = uuidv4();
         let { title, users_ids, body, note_type_name } = req.body
-        let media_files = req.files.map(file => {
-            return req.protocol + '://' + req.get('host') + '/notes_files/' + file.filename;
-        })
+        // title = "load test note 2"
+        // users_ids = "fa022f59-8330-4dfa-9d3f-f806905228b7"
+        // body = "load test note 2"
+        // note_type_name = "cook"
+        let media_files = []
+        if (req.files) {
+            req.files.map(file => {
+                return req.protocol + '://' + req.get('host') + '/notes_files/' + file.filename;
+            })
+        }
         let created_date = new Date()
         let sql = 'insert into notes(id, sender_id, title, body, note_type_name, media_files, created_date) values($1, $2, $3, $4, $5, $6, $7)'
         let params = [id, req.user.id, title, body, note_type_name, media_files, created_date]
@@ -29,6 +41,17 @@ exports.createNote = async (req, res, next) => {
                 return results.findIndex(user => user.user_id == id) == -1 ? true : false
             })
         }
+        console.log('-------------------------Added Note-----------------------------')
+        console.log(title)
+        client.publish("notifications", JSON.stringify({
+            id,
+            sender_id: req.user.id,
+            title,
+            body,
+            note_type_name,
+            media_files,
+            created_date
+        }))
         SocketServer.sendNotificationsToUsers(users_ids, {
             id,
             sender_id: req.user.id,

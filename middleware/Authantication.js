@@ -9,7 +9,7 @@ const Authantication_middleware = async (req, res, next) => {
         } else {
             const authHeader = req.get('Authorization')
             if (!authHeader) {
-                const err = new Error('Not Authenticated')
+                const err = new Error('Not Authenticated1')
                 err.statusCode = 401
                 throw err
             } else {
@@ -18,7 +18,7 @@ const Authantication_middleware = async (req, res, next) => {
                 if (results.length) {
                     req.user = results[0]
                 } else {
-                    const err = new Error('Not Authenticated')
+                    const err = new Error('Not Authenticated2')
                     error.statusCode = 401
                     throw err
                 }

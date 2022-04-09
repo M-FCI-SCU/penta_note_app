@@ -1,0 +1,1 @@
+loadtest -n 1000 -c 100 --rps 100 http://localhost:3000/create_note -P "{\"title\": \"loadtest note\"}" -H Authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQyNmNkODVhLTQ1MWQtNDViNC1iMThkLTAxNjllNDkyNzhkOCIsImVtYWlsIjoibWF4QGdtYWlsLmNvbSIsImlhdCI6MTY0Mzg5ODQzNX0.bQhiyGYgfE86HDJsJ-fMvGUJKurrD6jVITD-2wbIHUg -T 'application/x-www-form-urlencoded' -m 'POST'
